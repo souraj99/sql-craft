@@ -1,8 +1,7 @@
-import { history, historyKeymap, indentWithTab } from '@codemirror/commands';
+import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { sql } from '@codemirror/lang-sql';
 import { EditorState } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers } from '@codemirror/view';
-import { defaultKeymap } from '@codemirror/commands';
 import { useEffect, useRef } from 'react';
 
 type SqlEditorProps = {
@@ -42,7 +41,7 @@ export function SqlEditor({ value, theme, onChange, onRun }: SqlEditorProps) {
     });
 
     const state = EditorState.create({
-      doc: value,
+      doc: '',
       extensions: [
         lineNumbers(),
         history(),

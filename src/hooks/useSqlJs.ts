@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import initSqlJs, { type Database, type QueryExecResult } from 'sql.js';
 import { seedSql } from '../data/seedData';
 
@@ -38,6 +38,7 @@ const resultFromExec = (items: QueryExecResult[], elapsedMs: number): QueryResul
 
 export function useSqlJs() {
   const [state, setState] = useState<SqlState>({ db: null, isReady: false, loadingError: null });
+  const dbRef = useRef<Database | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -45,10 +46,11 @@ export function useSqlJs() {
     const init = async () => {
       try {
         const SQL = await initSqlJs({
-          locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${file}`,
+          locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${file}`,
         });
         const db = new SQL.Database();
         db.exec(seedSql);
+        dbRef.current = db;
 
         if (mounted) {
           setState({ db, isReady: true, loadingError: null });
@@ -64,9 +66,8 @@ export function useSqlJs() {
 
     return () => {
       mounted = false;
-      state.db?.close();
+      dbRef.current?.close();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const runQuery = useCallback(

@@ -12,20 +12,23 @@ type PlaygroundProps = {
 };
 
 export function Playground({ onSuccessfulRun }: PlaygroundProps) {
-  const { theme, playgroundQuery, dispatch, queryHistory } = useAppContext();
+  const { theme, playgroundQuery, dispatch, queryHistory, activeLessonId } = useAppContext();
   const { isReady, loadingError, runQuery } = useSqlJs();
-  const [query, setQuery] = useState(playgroundQuery);
   const [result, setResult] = useState<QueryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const setPlaygroundSql = (value: string) => {
+    dispatch({ type: 'SET_PLAYGROUND_QUERY', payload: value });
+  };
+
   const execute = async () => {
     try {
-      const output = await runQuery(query);
+      const output = await runQuery(playgroundQuery);
       setResult(output);
       setError(null);
-      dispatch({ type: 'MARK_COMPLETE', payload: '' });
+      dispatch({ type: 'MARK_COMPLETE', payload: activeLessonId });
       onSuccessfulRun();
-      dispatch({ type: 'ADD_HISTORY', payload: { query, timestamp: Date.now() } });
+      dispatch({ type: 'ADD_HISTORY', payload: { query: playgroundQuery, timestamp: Date.now() } });
     } catch (err) {
       setError((err as Error).message);
     }
@@ -35,23 +38,20 @@ export function Playground({ onSuccessfulRun }: PlaygroundProps) {
     <section className="playground-panel">
       <div className="playground-head">
         <h2>Playground</h2>
-        <button type="button" onClick={() => void execute()} disabled={!isReady}>
+        <button type="button" onClick={() => void execute()} disabled={!isReady || !playgroundQuery.trim()}>
           <Play size={14} /> Run (Ctrl+Enter)
         </button>
       </div>
       {loadingError && <div className="result-error"><p>{loadingError}</p></div>}
       <SqlEditor
-        value={query}
+        value={playgroundQuery}
         theme={theme}
-        onChange={(value) => {
-          setQuery(value);
-          dispatch({ type: 'SET_PLAYGROUND_QUERY', payload: value });
-        }}
+        onChange={setPlaygroundSql}
         onRun={() => void execute()}
       />
       <ResultsTable result={result} error={error} />
-      {isReady && <SchemaInspector runQuery={runQuery} onInsertQuery={(sql) => setQuery(sql)} />}
-      <QueryHistory items={queryHistory} onPick={(sql) => setQuery(sql)} dispatch={dispatch as never} />
+      {isReady && <SchemaInspector runQuery={runQuery} onInsertQuery={setPlaygroundSql} />}
+      <QueryHistory items={queryHistory} onPick={setPlaygroundSql} />
     </section>
   );
 }

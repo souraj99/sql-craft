@@ -1,5 +1,3 @@
-import type { Dispatch } from 'react';
-
 type QueryHistoryItem = {
   id: string;
   query: string;
@@ -9,7 +7,6 @@ type QueryHistoryItem = {
 type QueryHistoryProps = {
   items: QueryHistoryItem[];
   onPick: (query: string) => void;
-  dispatch: Dispatch<{ type: 'SET_PLAYGROUND_QUERY'; payload: string }>;
 };
 
 const trimQuery = (query: string) => (query.length > 48 ? `${query.slice(0, 48)}...` : query);

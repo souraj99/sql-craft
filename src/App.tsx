@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { curriculum } from './data/curriculum';
 import { useProgress } from './hooks/useProgress';
@@ -36,6 +36,10 @@ function AppContent() {
   );
 
   const visualization = visualizationMap[activeLesson.visualization as keyof typeof visualizationMap] ?? <WindowGrid />;
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   return (
     <Layout

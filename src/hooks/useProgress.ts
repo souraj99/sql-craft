@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useAppContext } from '../context/AppContext';
 
 export function useProgress(totalLessons: number) {
@@ -11,8 +10,5 @@ export function useProgress(totalLessons: number) {
     dispatch({ type: 'MARK_COMPLETE', payload: lessonId });
   };
 
-  return useMemo(
-    () => ({ completedLessons, completedCount, progressRatio, markComplete }),
-    [completedLessons, completedCount, progressRatio],
-  );
+  return { completedLessons, completedCount, progressRatio, markComplete };
 }
